@@ -7,12 +7,15 @@ import { DietPlan } from './components/diet-plan/diet-plan';
 import { Tracker } from './components/tracker/tracker';
 import { NavBar } from './components/nav-bar/nav-bar';
 import { PlanCreator } from './components/plan-creator/plan-creator';
+import { LoginComponent } from './components/login/login';
 import { DailyPlan } from './models/plan.model';
+import { AuthService } from './services/auth.service';
+import { User } from 'firebase/auth';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, PlanSelector, ExercisePlan, DietPlan, Tracker, NavBar, PlanCreator],
+  imports: [CommonModule, PlanSelector, ExercisePlan, DietPlan, Tracker, NavBar, PlanCreator, LoginComponent],
   templateUrl: './app.html',
   styles: []
 })
@@ -21,13 +24,30 @@ export class App implements OnInit {
   selectedPlan: DailyPlan | null = null;
   selectedDayName: string = '';
   currentView: string = 'dashboard';
+  user: User | null = null;
+  isLoading: boolean = true;
 
-  constructor(private planService: PlanService) { }
+  constructor(private planService: PlanService, public authService: AuthService) { }
 
-  async ngOnInit() {
+  ngOnInit() {
+    this.authService.user$.subscribe(async (user) => {
+      this.user = user;
+      this.isLoading = false;
+      if (user) {
+        await this.loadPlans();
+      } else {
+        this.plans = [];
+        this.selectedPlan = null;
+      }
+    });
+  }
+
+  async loadPlans() {
     this.plans = await this.planService.getPlans();
     if (this.plans.length > 0) {
-      this.onDaySelected(this.plans[0].day);
+      // Keep selected day if possible, otherwise first day
+      const dayToSelect = this.selectedDayName || this.plans[0].day;
+      this.onDaySelected(dayToSelect);
     }
   }
 
@@ -51,10 +71,7 @@ export class App implements OnInit {
   }
 
   async onPlanSaved() {
-    this.plans = await this.planService.getPlans();
-    if (this.selectedDayName) {
-      this.onDaySelected(this.selectedDayName);
-    }
+    await this.loadPlans();
   }
 
   get exCount(): number {

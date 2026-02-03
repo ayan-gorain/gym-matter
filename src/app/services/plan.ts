@@ -1,48 +1,71 @@
 import { Injectable } from '@angular/core';
 import { DailyPlan, PlanItem } from '../models/plan.model';
 import { db } from '../firebase.config';
-import { collection, getDocs, doc, setDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, query } from 'firebase/firestore';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlanService {
-  private plansCollection = collection(db, 'plans');
+  constructor(private authService: AuthService) { }
 
-  // Convert to Promise-based or Observable-based
+  // Helper to get the correct collection for the current user
+  private get userPlansCollection() {
+    const user = this.authService.currentUser;
+    if (!user) return null;
+    return collection(db, `users/${user.uid}/plans`);
+  }
+
+  // Helper to get a specific document reference
+  private getUserDocRef(day: string) {
+    const user = this.authService.currentUser;
+    if (!user) return null;
+    return doc(db, `users/${user.uid}/plans`, day);
+  }
+
   async getPlans(): Promise<DailyPlan[]> {
-    const q = query(this.plansCollection);
-    const querySnapshot = await getDocs(q);
+    if (!this.authService.currentUser) return [];
 
-    if (querySnapshot.empty) {
-      // Seed data if empty
-      await this.seedData();
-      return this.mockPlans;
+    try {
+      const colRef = this.userPlansCollection;
+      if (!colRef) return [];
+
+      const q = query(colRef);
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        await this.seedData();
+        return this.mockPlans;
+      }
+
+      const plans: DailyPlan[] = [];
+      querySnapshot.forEach((doc) => {
+        plans.push(doc.data() as DailyPlan);
+      });
+
+      const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      return plans.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
+    } catch (e) {
+      console.error("Error fetching plans", e);
+      return [];
     }
-
-    const plans: DailyPlan[] = [];
-    querySnapshot.forEach((doc) => {
-      plans.push(doc.data() as DailyPlan);
-    });
-
-    // Sort manually if dayOrder isn't perfect or needed
-    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return plans.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
   }
 
   async toggleItemCompletion(day: string, type: 'exercises' | 'diet', item: PlanItem, plan: DailyPlan): Promise<void> {
-    // In Firestore, we need to update the entire array or find the specific item. 
-    // Easiest here since we have the full plan is to update the array.
-    item.completed = !item.completed;
+    const docRef = this.getUserDocRef(day);
+    if (!docRef) return;
 
-    const docRef = doc(db, 'plans', day);
+    item.completed = !item.completed;
     await setDoc(docRef, {
       [type]: plan[type]
     }, { merge: true });
   }
 
   async updatePlan(day: string, exercises: PlanItem[], diet: PlanItem[], focus: string = ''): Promise<void> {
-    const docRef = doc(db, 'plans', day);
+    const docRef = this.getUserDocRef(day);
+    if (!docRef) throw new Error("User not authenticated");
+
     await setDoc(docRef, {
       day,
       exercises,
@@ -91,9 +114,12 @@ export class PlanService {
   ];
 
   private async seedData() {
-    console.log('Seeding data to Firestore...');
+    console.log('Seeding data to Firestore for User...');
     for (const plan of this.mockPlans) {
-      await setDoc(doc(db, 'plans', plan.day), plan);
+      const docRef = this.getUserDocRef(plan.day);
+      if (docRef) {
+        await setDoc(docRef, plan);
+      }
     }
   }
 }

@@ -1,42 +1,56 @@
-<app-nav-bar [currentView]="currentView" (navigate)="onNavigate($event)">
-</app-nav-bar>
+<div *ngIf="isLoading" class="flex justify-center items-center h-screen bg-slate-50">
+  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-800"></div>
+</div>
+<ng-container *ngIf="!isLoading">
+  <div *ngIf="user; else loginTemplate">
+    <app-nav-bar [currentView]="currentView" (navigate)="onNavigate($event)" [user]="user"
+      (logout)="authService.logout()">
+    </app-nav-bar>
 
-<div class="container mx-auto px-4 py-8 max-w-5xl" *ngIf="currentView === 'dashboard'">
-  <header class="text-center mb-10">
-    <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight">Gym Matters</h1>
-    <p class="text-xl text-slate-500 mt-2">Your AI-Powered Fitness Companion</p>
-  </header>
+    <div class="container mx-auto px-4 py-8 max-w-5xl" *ngIf="currentView === 'dashboard'">
+      <header class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight">Gym Matters</h1>
+        <p class="text-xl text-slate-500 mt-2">Your AI-Powered Fitness Companion</p>
+      </header>
 
-  <app-plan-selector [plans]="plans" [selectedDay]="selectedDayName" (daySelected)="onDaySelected($event)">
-  </app-plan-selector>
+      <app-plan-selector [plans]="plans" [selectedDay]="selectedDayName" (daySelected)="onDaySelected($event)">
+      </app-plan-selector>
 
-  <div class="bg-white rounded-xl p-6 my-6 shadow-sm text-center animate-[fadeIn_0.5s_ease-out]" *ngIf="selectedPlan">
-    <h2 class="text-2xl font-bold text-slate-700 mb-4">{{ selectedPlan.day }} <span *ngIf="selectedPlan.focus"
-        class="text-emerald-500 font-extrabold">- {{ selectedPlan.focus
-        }}</span></h2>
-    <div class="flex flex-wrap justify-center gap-4">
-      <span class="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-500">🔥 {{ totalCalories }} Kcal</span>
-      <span class="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-500">💪 {{ exCount }} Exercises</span>
-      <span class="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-500">🥗 {{ dietCount }} Diet Items</span>
+      <div class="bg-white rounded-xl p-6 my-6 shadow-sm text-center animate-[fadeIn_0.5s_ease-out]"
+        *ngIf="selectedPlan">
+        <h2 class="text-2xl font-bold text-slate-700 mb-4">{{ selectedPlan.day }} <span *ngIf="selectedPlan.focus"
+            class="text-emerald-500 font-extrabold">- {{ selectedPlan.focus
+            }}</span></h2>
+        <div class="flex flex-wrap justify-center gap-4">
+          <span class="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-500">🔥 {{ totalCalories }} Kcal</span>
+          <span class="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-500">💪 {{ exCount }} Exercises</span>
+          <span class="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-500">🥗 {{ dietCount }} Diet
+            Items</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8" *ngIf="selectedPlan">
+        <app-exercise-plan [exercises]="selectedPlan.exercises" (toggleItem)="onToggleItem($event)">
+        </app-exercise-plan>
+        <app-diet-plan [diet]="selectedPlan.diet" (toggleItem)="onToggleItem($event)">
+        </app-diet-plan>
+      </div>
+
+      <app-tracker *ngIf="selectedPlan" [exerciseCount]="exCount" [exerciseDone]="exDone" [dietCount]="dietCount"
+        [dietDone]="dietDone">
+      </app-tracker>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl" *ngIf="currentView === 'creator'">
+      <app-plan-creator [plans]="plans" (planSaved)="onPlanSaved()"></app-plan-creator>
+    </div>
+
+    <div class="text-center mt-12 text-slate-400 text-sm pb-8">
+      <p>&copy; 2026 Gym Matters. Stay Consistent!</p>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8" *ngIf="selectedPlan">
-    <app-exercise-plan [exercises]="selectedPlan.exercises" (toggleItem)="onToggleItem($event)">
-    </app-exercise-plan>
-    <app-diet-plan [diet]="selectedPlan.diet" (toggleItem)="onToggleItem($event)">
-    </app-diet-plan>
-  </div>
-
-  <app-tracker *ngIf="selectedPlan" [exerciseCount]="exCount" [exerciseDone]="exDone" [dietCount]="dietCount"
-    [dietDone]="dietDone">
-  </app-tracker>
-</div>
-
-<div class="container mx-auto px-4 py-8 max-w-5xl" *ngIf="currentView === 'creator'">
-  <app-plan-creator [plans]="plans" (planSaved)="onPlanSaved()"></app-plan-creator>
-</div>
-
-<div class="text-center mt-12 text-slate-400 text-sm pb-8">
-  <p>&copy; 2026 Gym Matters. Stay Consistent!</p>
-</div>
+  <ng-template #loginTemplate>
+    <app-login></app-login>
+  </ng-template>
+</ng-container>
