@@ -1,0 +1,22 @@
+<div class="bg-gradient-to-br from-green-600 to-green-500 text-white rounded-2xl p-6 shadow-lg h-full min-h-[250px]">
+    <h3 class="text-2xl mt-0 mb-5 border-b border-white/30 pb-2 font-bold">🥗 Diet Plan</h3>
+    <ul *ngIf="diet && diet.length > 0; else noData" class="list-none p-0">
+        <li *ngFor="let item of diet"
+            class="bg-white/15 mb-2 p-3 rounded-lg cursor-pointer flex justify-between items-center gap-3 transition-all hover:bg-white/25"
+            [class.line-through]="item.completed" [class.bg-green-500-40]="item.completed"
+            [class.text-white-80]="item.completed" [class.bg-green-500]="item.completed"
+            [class.bg-opacity-40]="item.completed" (click)="onToggle(item)">
+            <div class="flex items-center gap-3">
+                <span class="w-5 h-5 border-2 border-white rounded inline-flex items-center justify-center relative">
+                    <span *ngIf="item.completed" class="font-bold text-sm">✓</span>
+                </span>
+                {{ item.content }}
+            </div>
+            <span class="bg-black/20 px-2 py-0.5 rounded-full text-xs whitespace-nowrap" *ngIf="item.calories">{{
+                item.calories }} kcal</span>
+        </li>
+    </ul>
+    <ng-template #noData>
+        <p>Select a day to view the menu.</p>
+    </ng-template>
+</div>

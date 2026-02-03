@@ -1,0 +1,94 @@
+<div class="p-5 text-slate-800">
+    <h2 class="text-center text-slate-700 font-bold mb-8 text-3xl">🛠️ Create Your Custom Plan</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Exercise Section -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-purple-600">
+            <h3 class="text-xl font-bold mb-4">Add Exercises</h3>
+            <div class="flex gap-3 mb-5">
+                <input type="text" #exInput placeholder="e.g. Pushups"
+                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-[2]">
+                <input type="text" #timeInput placeholder="Time/Reps"
+                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-1"
+                    (keyup.enter)="addExercise(exInput.value, timeInput.value); exInput.value=''; timeInput.value=''">
+                <button (click)="addExercise(exInput.value, timeInput.value); exInput.value=''; timeInput.value=''"
+                    class="bg-slate-700 text-white border-0 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors w-12 text-2xl">+</button>
+            </div>
+
+            <ul class="list-none p-0 min-h-[100px]">
+                <li *ngIf="newExercises.length === 0"
+                    class="text-slate-400 italic justify-center p-3 border-b border-slate-100 flex items-center">No
+                    exercises added yet.</li>
+                <li *ngFor="let ex of newExercises; let i = index"
+                    class="p-3 border-b border-slate-100 flex justify-between items-center last:border-0">
+                    <span>{{ ex.content }} <small *ngIf="ex.duration" class="text-slate-500">({{ ex.duration
+                            }})</small></span>
+                    <span class="text-red-500 cursor-pointer font-bold text-xl hover:scale-110 transition-transform"
+                        (click)="removeExercise(i)">×</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Diet Section -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-green-600">
+            <h3 class="text-xl font-bold mb-4">Add Diet & Calories</h3>
+            <div class="flex gap-3 mb-5">
+                <input type="text" #dietInput placeholder="Food item"
+                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-[2]">
+                <input type="number" #calInput placeholder="Cal"
+                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-1"
+                    (keyup.enter)="addDietItem(dietInput.value, calInput.value); dietInput.value=''; calInput.value=''">
+                <button (click)="addDietItem(dietInput.value, calInput.value); dietInput.value=''; calInput.value=''"
+                    class="bg-slate-700 text-white border-0 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors w-12 text-2xl">+</button>
+            </div>
+
+            <ul class="list-none p-0 min-h-[100px]">
+                <li *ngIf="newDiet.length === 0"
+                    class="text-slate-400 italic justify-center p-3 border-b border-slate-100 flex items-center">No food
+                    added yet.</li>
+                <li *ngFor="let item of newDiet; let i = index"
+                    class="p-3 border-b border-slate-100 flex justify-between items-center last:border-0">
+                    <span>{{ item.content }}</span>
+                    <span class="bg-orange-500 text-white rounded-full px-2 py-0.5 text-xs ml-auto mr-3"
+                        *ngIf="item.calories">{{ item.calories }} cal</span>
+                    <span class="text-red-500 cursor-pointer font-bold text-xl hover:scale-110 transition-transform"
+                        (click)="removeDiet(i)">×</span>
+                </li>
+            </ul>
+
+            <div class="text-right mt-5 text-xl font-bold text-slate-700" *ngIf="totalCalories > 0">
+                Total Calories: <strong>{{ totalCalories }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Logic -->
+    <div class="col-span-1 md:col-span-2 mt-8 text-center bg-white p-6 rounded-xl shadow-sm">
+        <h3 class="text-xl font-bold mb-2">💾 Save Your Plan</h3>
+        <p class="text-slate-500 mb-4">Assign this plan to a day and give it a focus name:</p>
+
+        <div class="flex flex-col items-center gap-4 mt-4">
+            <div class="flex justify-center gap-4 flex-wrap">
+                <select #daySelect (change)="onDayChange(daySelect.value)"
+                    class="p-3 text-lg rounded-lg border border-slate-300 focus:outline-none focus:border-green-500">
+                    <option *ngFor="let day of days" [value]="day" [selected]="day === selectedDay">{{ day }}</option>
+                </select>
+
+                <input type="text" #focusInput (input)="planFocus = focusInput.value" [value]="planFocus"
+                    placeholder="Focus (e.g. Leg Day)"
+                    class="p-3 text-lg rounded-lg border border-slate-300 focus:outline-none focus:border-green-500 min-w-[250px]">
+
+                <button
+                    class="text-lg px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-lg shadow-md font-bold transition-transform hover:-translate-y-0.5 border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    (click)="savePlan(); focusInput.value=''" [disabled]="isSaving">
+                    {{ isSaving ? 'Saving...' : 'Save Plan' }}
+                </button>
+            </div>
+
+            <p *ngIf="lastUpdatedDate" class="text-xs text-slate-400 italic mt-2">
+                Last updated: {{ lastUpdatedDate | date:'medium' }}
+            </p>
+        </div>
+    </div>
+
+</div>

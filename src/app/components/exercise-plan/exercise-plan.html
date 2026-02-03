@@ -1,0 +1,22 @@
+<div class="bg-gradient-to-br from-purple-600 to-purple-500 text-white rounded-2xl p-6 shadow-lg h-full min-h-[250px]">
+    <h3 class="text-2xl mt-0 mb-5 border-b border-white/30 pb-2 font-bold">🏋️ Exercise Plan</h3>
+    <ul *ngIf="exercises && exercises.length > 0; else noData" class="list-none p-0">
+        <li *ngFor="let ex of exercises"
+            class="bg-white/15 mb-2 p-3 rounded-lg cursor-pointer flex justify-between items-center gap-3 transition-all hover:bg-white/25"
+            [class.line-through]="ex.completed" [class.bg-green-500-40]="ex.completed"
+            [class.text-white-80]="ex.completed" [class.bg-green-500]="ex.completed"
+            [class.bg-opacity-40]="ex.completed" (click)="onToggle(ex)">
+            <div class="flex items-center gap-3">
+                <span class="w-5 h-5 border-2 border-white rounded inline-flex items-center justify-center relative">
+                    <span *ngIf="ex.completed" class="font-bold text-sm">✓</span>
+                </span>
+                {{ ex.content }}
+            </div>
+            <span class="bg-black/20 px-2 py-0.5 rounded-full text-xs whitespace-nowrap" *ngIf="ex.duration">{{
+                ex.duration }}</span>
+        </li>
+    </ul>
+    <ng-template #noData>
+        <p>Select a day to view the workout.</p>
+    </ng-template>
+</div>

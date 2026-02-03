@@ -1,0 +1,15 @@
+<nav class="flex justify-between items-center px-6 py-4 bg-slate-800 text-white shadow-md">
+    <div class="text-2xl font-bold tracking-wider">Gym Matters</div>
+    <div class="flex gap-4">
+        <button (click)="onNavigate('dashboard')"
+            class="bg-transparent border-0 text-slate-100 text-base cursor-pointer px-3 py-2 rounded transition-colors hover:bg-white/10"
+            [class.bg-teal-500]="currentView === 'dashboard'" [class.font-bold]="currentView === 'dashboard'">
+            Dashboard
+        </button>
+        <button (click)="onNavigate('creator')"
+            class="bg-transparent border-0 text-slate-100 text-base cursor-pointer px-3 py-2 rounded transition-colors hover:bg-white/10"
+            [class.bg-teal-500]="currentView === 'creator'" [class.font-bold]="currentView === 'creator'">
+            Create Plan
+        </button>
+    </div>
+</nav>
