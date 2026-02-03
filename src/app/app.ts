@@ -64,7 +64,7 @@ export class App implements OnInit {
     // Determine context (exercise or diet)
     if (!this.selectedPlan) return;
 
-    const isScale = (i: any) => i.calories !== undefined; // Simple check if it's diet
+    const isScale = (i: any) => i.calories !== undefined && i.duration === undefined; // Check properties strictly
     const type = isScale(item) ? 'diet' : 'exercises';
 
     await this.planService.toggleItemCompletion(this.selectedPlan.day, type as 'exercises' | 'diet', item, this.selectedPlan);
@@ -92,5 +92,11 @@ export class App implements OnInit {
 
   get totalCalories(): number {
     return this.selectedPlan ? this.selectedPlan.diet.reduce((acc, item) => acc + (item.calories || 0), 0) : 0;
+  }
+
+  get totalBurnt(): number {
+    return this.selectedPlan ? this.selectedPlan.exercises
+      .filter(x => x.completed)
+      .reduce((acc, item) => acc + (item.calories || 0), 0) : 0;
   }
 }
