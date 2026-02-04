@@ -12,10 +12,12 @@ import { DailyPlan } from './models/plan.model';
 import { AuthService } from './services/auth.service';
 import { User } from 'firebase/auth';
 
+import { HistoryComponent } from './components/history/history';
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, PlanSelector, ExercisePlan, DietPlan, Tracker, NavBar, PlanCreator, LoginComponent],
+  imports: [CommonModule, PlanSelector, ExercisePlan, DietPlan, Tracker, NavBar, PlanCreator, LoginComponent, HistoryComponent],
   templateUrl: './app.html',
   styles: []
 })
@@ -98,5 +100,15 @@ export class App implements OnInit {
     return this.selectedPlan ? this.selectedPlan.exercises
       .filter(x => x.completed)
       .reduce((acc, item) => acc + (item.calories || 0), 0) : 0;
+  }
+
+  async onFinishWeek() {
+    if (confirm('Are you sure you want to finish this week? This will save your progress to history and reset the plan for a new week.')) {
+      this.isLoading = true;
+      await this.planService.archiveCurrentWeek();
+      await this.loadPlans();
+      this.isLoading = false;
+      this.currentView = 'history';
+    }
   }
 }

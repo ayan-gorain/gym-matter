@@ -32,5 +32,10 @@
             [class.bg-teal-500]="currentView === 'creator'" [class.font-bold]="currentView === 'creator'">
             Create Plan
         </button>
+        <button (click)="onNavigate('history')"
+            class="bg-transparent border-0 text-slate-100 text-sm md:text-base cursor-pointer px-4 py-2 rounded transition-colors hover:bg-white/10"
+            [class.bg-teal-500]="currentView === 'history'" [class.font-bold]="currentView === 'history'">
+            History
+        </button>
     </div>
 </nav>

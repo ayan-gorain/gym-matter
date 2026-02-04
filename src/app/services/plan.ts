@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DailyPlan, PlanItem } from '../models/plan.model';
 import { db } from '../firebase.config';
-import { collection, getDocs, doc, setDoc, query } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, query, addDoc } from 'firebase/firestore';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -84,6 +84,65 @@ export class PlanService {
     { day: 'Saturday', exercises: [], diet: [] },
     { day: 'Sunday', exercises: [], diet: [] }
   ];
+
+  async archiveCurrentWeek(): Promise<void> {
+    const user = this.authService.currentUser;
+    if (!user) return;
+
+    const currentPlans = await this.getPlans();
+
+    // Calculate stats for the history record
+    const stats = currentPlans.reduce((acc, plan) => {
+      acc.totalExercises += plan.exercises.length;
+      acc.completedExercises += plan.exercises.filter(e => e.completed).length;
+      acc.totalDiet += plan.diet.length;
+      acc.completedDiet += plan.diet.filter(d => d.completed).length;
+      acc.totalCaloriesBurnt += plan.exercises
+        .filter(e => e.completed && e.calories)
+        .reduce((sum, e) => sum + (e.calories || 0), 0);
+      return acc;
+    }, { totalExercises: 0, completedExercises: 0, totalDiet: 0, completedDiet: 0, totalCaloriesBurnt: 0 });
+
+    const historyData = {
+      completedDate: new Date().toISOString(), // Use ISO string for easier querying/sorting if needed, or stick to timestamp
+      timestamp: Date.now(),
+      stats,
+      plans: currentPlans
+    };
+
+    // Save to history collection
+    const historyColRef = collection(db, `users/${user.uid}/history`);
+    await addDoc(historyColRef, historyData);
+
+    // Reset current plans
+    const updates = currentPlans.map(plan => {
+      const resetExercises = plan.exercises.map(e => ({ ...e, completed: false }));
+      const resetDiet = plan.diet.map(d => ({ ...d, completed: false }));
+
+      const docRef = this.getUserDocRef(plan.day);
+      if (!docRef) return Promise.resolve(); // Should not happen
+
+      return setDoc(docRef, {
+        exercises: resetExercises,
+        diet: resetDiet
+      }, { merge: true });
+    });
+
+    await Promise.all(updates);
+  }
+
+  async getHistory(): Promise<any[]> {
+    const user = this.authService.currentUser;
+    if (!user) return [];
+
+    const historyColRef = collection(db, `users/${user.uid}/history`);
+    const q = query(historyColRef); // In a real app, order by timestamp desc
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .sort((a: any, b: any) => b.timestamp - a.timestamp);
+  }
 
   private async seedData() {
     console.log('Seeding data to Firestore for User...');

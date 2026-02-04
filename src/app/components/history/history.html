@@ -1,0 +1,63 @@
+<div class="animate-[fadeIn_0.5s_ease-out]">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Plan History</h2>
+
+    <div *ngIf="loading" class="flex justify-center p-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-800"></div>
+    </div>
+
+    <div *ngIf="!loading && historyRecords.length === 0"
+        class="text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-slate-200">
+        <p class="text-lg">No history found yet.</p>
+        <p class="text-sm mt-2">Finish a week to see it here!</p>
+    </div>
+
+    <div class="space-y-6">
+        <div *ngFor="let record of historyRecords"
+            class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div class="flex flex-col md:flex-row justify-between md:items-center border-b border-slate-100 pb-4 mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-700">Week Ending</h3>
+                    <p class="text-slate-500">{{ formatDate(record.completedDate) }}</p>
+                </div>
+                <div class="mt-2 md:mt-0">
+                    <span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-sm font-bold">
+                        Completed
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-50 p-3 rounded-lg text-center">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Exercises</p>
+                    <p class="text-xl font-bold text-slate-700">
+                        {{ record.stats.completedExercises }} <span class="text-sm text-slate-400">/ {{
+                            record.stats.totalExercises }}</span>
+                    </p>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg text-center">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Diet Items</p>
+                    <p class="text-xl font-bold text-slate-700">
+                        {{ record.stats.completedDiet }} <span class="text-sm text-slate-400">/ {{
+                            record.stats.totalDiet }}</span>
+                    </p>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg text-center">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Calories Burnt</p>
+                    <p class="text-xl font-bold text-orange-500">
+                        {{ record.stats.totalCaloriesBurnt }}
+                    </p>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg text-center flex items-center justify-center">
+                    <!-- Simple completion rate circle or just percentage -->
+                    <div class="text-center">
+                        <p class="text-xs text-slate-400 font-bold uppercase">Rate</p>
+                        <p class="text-xl font-bold text-indigo-500">
+                            {{ ((record.stats.completedExercises + record.stats.completedDiet) /
+                            (record.stats.totalExercises + record.stats.totalDiet) * 100) | number:'1.0-0' }}%
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
