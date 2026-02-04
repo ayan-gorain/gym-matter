@@ -56,14 +56,11 @@ export class PlanCreator implements OnInit, OnChanges {
     }
   }
 
-  addExercise(content: string, time: string, calories: string = '') {
+  addExercise(content: string) {
     if (content.trim()) {
-      const cal = calories ? parseInt(calories, 10) : undefined;
       this.newExercises.push({
         content: content.trim(),
         completed: false, // Default to unchecked for new items
-        duration: time.trim(),
-        calories: cal
       });
     }
   }

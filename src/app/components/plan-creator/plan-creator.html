@@ -7,14 +7,9 @@
             <h3 class="text-xl font-bold mb-4">Add Exercises</h3>
             <div class="flex gap-3 mb-5">
                 <input type="text" #exInput placeholder="e.g. Pushups"
-                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-[2]">
-                <input type="text" #timeInput placeholder="Time/Reps"
-                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-1">
-                <input type="number" #burnInput placeholder="Burn Cal"
-                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-1"
-                    (keyup.enter)="addExercise(exInput.value, timeInput.value, burnInput.value); exInput.value=''; timeInput.value=''; burnInput.value=''">
-                <button
-                    (click)="addExercise(exInput.value, timeInput.value, burnInput.value); exInput.value=''; timeInput.value=''; burnInput.value=''"
+                    class="p-3 border border-slate-300 rounded-lg text-base w-full focus:outline-none focus:border-cyan-500 flex-[2]"
+                    (keyup.enter)="addExercise(exInput.value); exInput.value=''">
+                <button (click)="addExercise(exInput.value); exInput.value=''"
                     class="bg-slate-700 text-white border-0 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors w-12 text-2xl">+</button>
             </div>
 
@@ -24,10 +19,7 @@
                     exercises added yet.</li>
                 <li *ngFor="let ex of newExercises; let i = index"
                     class="p-3 border-b border-slate-100 flex justify-between items-center last:border-0">
-                    <span>{{ ex.content }} <small *ngIf="ex.duration" class="text-slate-500">({{ ex.duration
-                            }})</small></span>
-                    <span class="bg-orange-500 text-white rounded-full px-2 py-0.5 text-xs ml-auto mr-3"
-                        *ngIf="ex.calories">🔥 {{ ex.calories }} cal</span>
+                    <span>{{ ex.content }}</span>
                     <span class="text-red-500 cursor-pointer font-bold text-xl hover:scale-110 transition-transform"
                         (click)="removeExercise(i)">×</span>
                 </li>
